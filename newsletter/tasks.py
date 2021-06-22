@@ -1,3 +1,5 @@
+import os
+
 from celery import shared_task
 from django.core.mail import send_mail
 
@@ -15,5 +17,5 @@ def send_issue(issue_id):
 @shared_task()
 def send_email(email, title, content):
     send_mail(
-        title, content, 'ambitrafika2@gmail.com', [email], fail_silently=False
+        title, content, os.getenv('EMAIL_HOST_USER'), [email], fail_silently=False
     )

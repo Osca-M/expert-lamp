@@ -7,7 +7,7 @@ services:
     ports:
     - 5432:5432
   rabbitmq:
-    image: rabbitmq
+    image: rabbitmq:management
     ports:
     - 5672:5672
   flower:
@@ -17,3 +17,5 @@ services:
     command: ["flower", "--broker=amqp://rabbitmq:5672"]
     depends_on:
       - rabbitmq
+    environment:
+      - FLOWER_BROKER_API_URL=http://guest:guest@broker:15672/api/vhost
