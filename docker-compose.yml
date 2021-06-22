@@ -10,3 +10,10 @@ services:
     image: rabbitmq
     ports:
     - 5672:5672
+  flower:
+    image: mher/flower
+    ports:
+    - 5555:5555
+    command: ["flower", "--broker=amqp://rabbitmq:5672"]
+    depends_on:
+      - rabbitmq
