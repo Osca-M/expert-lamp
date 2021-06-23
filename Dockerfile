@@ -29,3 +29,4 @@ RUN useradd --create-home appuser
 WORKDIR /home/appuser
 USER appuser
 COPY . .
+EXPOSE 8000

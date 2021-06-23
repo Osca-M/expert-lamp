@@ -1,4 +1,4 @@
-version: '3'
+version: '3.5'
 services:
   db:
     image: postgres:13
@@ -6,8 +6,6 @@ services:
       - .env
     ports:
     - 5432:5432
-#    volumes:
-#      - pgdata:/var/lib/postgresql/data
   rabbitmq:
     image: rabbitmq:management
     ports:
@@ -25,8 +23,8 @@ services:
     build:
       context: .
     command:
-      sh -c "python3 manage.py migrate &&
-      python3 manage.py runserver 0.0.0.0:8000"
+      sh -c "python3 manage.py wait_for_db && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"
+    restart: on-failure
     ports:
     - 8000:8000
     env_file:
@@ -34,15 +32,18 @@ services:
     depends_on:
       - db
       - rabbitmq
-    image: newsletter_site:latest
+    image: expert-lamp_celery:latest
   celery:
     restart: always
     build:
       context: .
-    command: bash -c "celery - A newsletter_site worker -l info"
+    command: sh -c "celery -A newsletter_site worker -l info"
     depends_on:
+      - rabbitmq
       - db
       - newsletter_site
-      - rabbitmq
-# TODO: ENSURE DB is up before running the app
-# TODO: Check on celery command
+
+
+
+# TODO: Configure volumes
+# TODO: Add network for containers
