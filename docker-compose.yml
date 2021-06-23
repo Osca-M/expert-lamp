@@ -6,6 +6,8 @@ services:
       - .env
     ports:
     - 5432:5432
+#    volumes:
+#      - pgdata:/var/lib/postgresql/data
   rabbitmq:
     image: rabbitmq:management
     ports:
@@ -19,3 +21,27 @@ services:
       - rabbitmq
     environment:
       - FLOWER_BROKER_API_URL=http://guest:guest@broker:15672/api/vhost
+  newsletter_site:
+    build:
+      context: .
+    command:
+      sh -c "python3 manage.py migrate &&
+      python3 manage.py runserver 0.0.0.0:8000"
+    ports:
+    - 8000:8000
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - rabbitmq
+    image: newsletter_site:latest
+  celery:
+    restart: always
+    build:
+      context: .
+    command: bash -c "celery - A newsletter_site worker -l info"
+    depends_on:
+      - db
+      - newsletter_site
+      - rabbitmq
+# TODO: ENSURE DB is up before running the app
