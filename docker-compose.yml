@@ -45,3 +45,4 @@ services:
       - newsletter_site
       - rabbitmq
 # TODO: ENSURE DB is up before running the app
+# TODO: Check on celery command
