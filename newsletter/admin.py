@@ -7,7 +7,6 @@ admin.site.register(Subscription)
 
 
 def send(modeladmin, request, queryset):
-    print('sending queryset')
     for issue in queryset:
         tasks.send_issue.delay(issue.id)
 
