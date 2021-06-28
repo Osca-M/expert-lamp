@@ -18,11 +18,11 @@ services:
     depends_on:
       - rabbitmq
     environment:
-      - FLOWER_BROKER_API_URL=http://guest:guest@broker:15672/api/vhost
+      - FLOWER_BROKER_API_URL=http://guest:guest@rabbitmq:15672/api/vhost
   newsletter_site:
     build:
       context: .
-    command: sh -c "python3 manage.py wait_for_db && python3 manage.py migrate && python3 manage.py init_admin &&python3 manage.py runserver 0.0.0.0:8000"
+    command: sh -c "python3 manage.py wait_for_db && python3 manage.py migrate && python3 manage.py init_admin && python3 manage.py runserver 0.0.0.0:8000"
     restart: on-failure
     ports:
     - 8000:8000
@@ -30,6 +30,7 @@ services:
       - .env
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+      - CELERY_BROKER_URL=pyamqp://rabbitmq:5672
     depends_on:
       - db
       - rabbitmq
@@ -42,6 +43,7 @@ services:
     depends_on:
       - newsletter_site
     environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
       - CELERY_BROKER_URL=amqp://rabbitmq:5672
 
 
