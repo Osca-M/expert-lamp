@@ -22,7 +22,7 @@ services:
   newsletter_site:
     build:
       context: .
-    command: sh -c "python3 manage.py wait_for_db && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"
+    command: sh -c "python3 manage.py wait_for_db && python3 manage.py migrate && python3 manage.py init_admin &&python3 manage.py runserver 0.0.0.0:8000"
     restart: on-failure
     ports:
     - 8000:8000
