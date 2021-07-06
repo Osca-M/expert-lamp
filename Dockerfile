@@ -1,5 +1,5 @@
 FROM python:3.8-slim as base
-LABEL maintainer="Osca Mwongera oscamwongera@gmail.com"
+LABEL maintainer="Osca Mwongera <oscamwongera@gmail.com>"
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -25,7 +25,10 @@ COPY --from=python-deps /.venv /.venv
 
 ENV PATH="/.venv/bin:$PATH"
 
-RUN useradd --create-home appuser
+RUN adduser --system --group appuser
+
 WORKDIR /home/appuser
-USER appuser
+RUN mkdir /home/appuser/staticfiles
 COPY . .
+RUN chown -R appuser:appuser /home/appuser
+USER appuser
