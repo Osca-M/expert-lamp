@@ -1,0 +1,8 @@
+# Ignore
+.git
+.env
+.cache
+nginx/
+*.sqlite3
+kubernetes/
+celerybeat*
