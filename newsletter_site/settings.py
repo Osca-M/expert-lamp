@@ -29,10 +29,9 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', False)
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(' ')
-
+ALLOWED_HOSTS = ['*']
+ALLOWED_CIDR_NETS = os.environ.get("ALLOWED_CIDR_NETS", default='10.0.0.0/16').split(" ")
 # Application definition
-
 INSTALLED_APPS = [
     'newsletter.apps.NewsletterConfig',
     'django.contrib.admin',
@@ -44,6 +43,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'allow_cidr.middleware.AllowCIDRMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
