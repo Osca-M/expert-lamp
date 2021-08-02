@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: expert-lamp-secret
+type: Opaque
+stringData:
+  celery-boker-url: "pyamqp://localhost:5672"
+  email-host: "smtp.gmail.com"
+  email-host-user: "ambitrafika2@gmail.com"
+  email-host-password: "mfjnmuhuietakwvo"
+  debug: "True"
+  allowed-host: "*"
+  secret-key: "d9@85_i=sce*r&@5xsccd()m&&$(x9y^ti^z#f68n2wv=(bew6"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: expert-lamp
+  labels:
+    apps: expert-lamp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: expert-lamp
+  template:
+    metadata:
+      labels:
+        app: expert-lamp
+    spec:
+      containers:
+        - name: expert-lamp
+          image: expert_lamp:latest
+          imagePullPolicy: Never
+          command: ["/bin/sh","-c"]
+          args: ["python manage.py wait_for_db; python manage.py migrate --noinput && python manage.py init_admin && python manage.py collectstatic --no-input --clear && gunicorn newsletter_site.wsgi:application --bind 0.0.0.0:8000"]
+          ports:
+            - containerPort: 8000
+          env:
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: expert-lamp-secret
+                  key: secret-key
+            - name: DATABASE_URL
+              value: "postgres://postgres:postgres@expert-lamp-db-service:5432/postgres"
+            - name: DEBUG
+              value: "True"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: expert-lamp-service
+spec:
+  selector:
+    pod: expert-lamp
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: NodePort

@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: db-pv
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 4Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /expert-lamp/db-pv
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: db-pvc
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi
+  volumeName: db-pv
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config-map
+data:
+  POSTGRES_PASSWORD: postgres
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: expert-lamp-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: expert-lamp-db
+  template:
+    metadata:
+      labels:
+        app: expert-lamp-db
+        tier: backend
+    spec:
+      containers:
+        - name: expert-lamp-db
+          image: postgres:13
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config-map
+                  key: POSTGRES_PASSWORD
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: expert-lamp-db-volume-mount
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: expert-lamp-db-volume-mount
+          persistentVolumeClaim:
+            claimName: db-pvc
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: expert-lamp-db-service
+spec:
+  selector:
+    app: expert-lamp-db
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

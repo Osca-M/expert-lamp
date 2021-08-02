@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: expert-lamp
+  labels:
+    app: expert-lamp
+spec:
+    replicas: 10
+  selector:
+    matchLabels:
+      app: expert-lamp
+  template:
+    metadata:
+      labels:
+        app: polls
+    spec:
+      containers:
+        - image: expert_lamp:latest
+          name: expert_lamp
+          envFrom:
+            - secretRef:
+                name: expert-lamp-secrets
+            - configMapRef:
+                name: expert-lamp-configuration
+            ports:
+              - containerPort: 8000
+                name: gunicorn
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: expert-lamp
+  labels:
+    app: expert-lamp
+spec:
+  type: NodePort
+  selector:
+    app: expert-lamp
+  ports:
+    - port: 8000
+      targetPort: 8000
